@@ -75,16 +75,17 @@ static bool render(const InfiltratrTemporalClockProvider *provider,
 
 static bool text_changed(int64_t instant, uint32_t delta_ms,
                          bool show_seconds, double longitude,
-                         const char *original)
+                         const char *original, bool *different)
 {
     char next[96] = {0};
     const int64_t delta = (int64_t)delta_ms * INT64_C(1000);
-    if (instant > INT64_MAX - delta)
+    if (different == NULL || original == NULL || instant > INT64_MAX - delta)
         return false;
     if (!render(NULL, NULL, instant + delta, 0, show_seconds,
                 false, 0.0, longitude, next, sizeof(next), NULL))
         return false;
-    return strcmp(original, next) != 0;
+    *different = strcmp(original, next) != 0;
+    return true;
 }
 
 /* Binary-search the first displayed change at millisecond resolution. */
@@ -96,16 +97,20 @@ static bool next_tick(const InfiltratrTemporalClockProvider *provider,
     char original[96] = {0};
     uint32_t low = 0U;
     uint32_t high = show_seconds ? 2000U : 61000U;
+    bool different = false;
     (void)provider; (void)offset; (void)latitude;
     if (milliseconds == NULL ||
         !render(NULL, NULL, instant, 0, show_seconds, false,
                 0.0, longitude, original, sizeof(original), NULL) ||
-        !text_changed(instant, high, show_seconds, longitude, original))
+        !text_changed(instant, high, show_seconds, longitude, original, &different) ||
+        !different)
         return false;
     while (high - low > 1U) {
         const uint32_t middle = low + (high - low) / 2U;
-        if (text_changed(instant, middle, show_seconds,
-                         longitude, original))
+        if (!text_changed(instant, middle, show_seconds,
+                          longitude, original, &different))
+            return false;
+        if (different)
             high = middle;
         else
             low = middle;
