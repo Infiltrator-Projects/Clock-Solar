@@ -1,0 +1,14 @@
+{
+  "title": "Apparent Solar Clock",
+  "intro": "Apparent solar time (SOL) describes the time indicated by the Sun's apparent motion, as a sundial would indicate, rather than a time-zone clock.",
+  "structure": "The display uses conventional 24-hour fields with the SOL suffix. The Sun's local meridian transit corresponds approximately to 12:00 SOL. Longitude contributes four ordinary minutes per degree; the equation of time accounts for the seasonal difference between apparent and mean solar time.",
+  "example": "For an illustrative instant at 12:00 UTC, longitude 15 degrees east and an equation-of-time correction of +4 minutes, the model would read 13:04 SOL. The correction changes with date and time; the example is not a prediction for a particular date.",
+  "history": "Sundials and other apparent-solar observations preceded uniform civil time. Apparent solar time and local mean solar time are distinct because the Sun's apparent daily motion is not uniform over the year.",
+  "model": "The provider obtains compact NOAA-style fractional-year equation-of-time terms, adds longitude × 240 seconds and equation-of-time minutes × 60 to UTC day phase, wraps modulo 86400, and floors the displayed fields. It searches for the first changed rendered reading at millisecond resolution, up to two seconds or 61 seconds depending on precision.",
+  "limits": "Uses an approximate solar model, not an observational ephemeris. Longitude must be finite and valid; latitude is not used in this calculation. It is not a sunrise/sunset clock and does not substitute Greenwich or local civil time when location is missing.",
+  "sources": [
+    "Implementation: https://github.com/Infiltrator-Projects/Clock-Solar/blob/main/src/provider.c",
+    "Model evidence: https://github.com/Infiltrator-Projects/Clock-Solar/blob/main/docs/MODEL.md",
+    "Shared contract: https://github.com/Infiltrator-Projects/Libraries/blob/main/docs/TEMPORAL_PROVIDERS.md"
+  ]
+}
